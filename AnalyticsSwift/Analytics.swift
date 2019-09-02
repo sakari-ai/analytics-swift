@@ -27,12 +27,18 @@ import Foundation
 */
 
 public class Analytics {
-
-    /** 
-    The writeKey for the Segment project this client will upload events to.
-    */
-
+    
+    /**
+     The writeKey for the Sakari project this client will upload events to.
+     */
+    
     private let writeKey: String
+    
+    /**
+     The accountID for the Sakari project this client will upload events to.
+     */
+    
+    private let accountID: String
 
     /**
      In memory queue of enqueued events.
@@ -57,12 +63,13 @@ public class Analytics {
     /**
      Initializes a new Analytics client with the provided parameters.
      - parameter writeKey: Write Key for your Segment project
+     - parameter accountID: Account ID for your Segment project
      - returns: A beautiful, brand-new, custom built Analytics client just for you. ❤️
     */
 
-    public static func create(writeKey: String) -> Analytics {
+    public static func create(writeKey: String, accountID: String) -> Analytics {
         let executor = SerialExecutor(name:"com.segment.executor." + writeKey)
-        return Analytics(writeKey: writeKey, queue: [], executor: executor)
+        return Analytics(writeKey: writeKey, accountID: accountID, queue: [], executor: executor)
     }
   
     /**
@@ -73,8 +80,9 @@ public class Analytics {
      Exposed for testing only. Do not use this directly.
     */
 
-    public init(writeKey: String, queue: [[String: AnyObject]], executor: Executor) {
+    public init(writeKey: String, accountID: String, queue: [[String: AnyObject]], executor: Executor) {
         self.writeKey = writeKey
+        self.accountID = accountID
         self.messageQueue = queue
         self.executor = executor
     }
@@ -86,10 +94,12 @@ public class Analytics {
     */
 
     public func enqueue(messageBuilder: MessageBuilder) {
+        var item = [:] as [String: AnyObject]
         var message = messageBuilder.build()
         Analytics.ensureId(message: message)
         message["messageId"] = UUID().uuidString as AnyObject
         message["timestamp"] = now as AnyObject
+        item[messageBuilder.type()] = message as AnyObject
         executor.submit {
             self.messageQueue.append(message)
             if self.messageQueue.count >= self.flushQueueSize {
@@ -122,7 +132,7 @@ public class Analytics {
     */
 
     private func request(endpoint: String) -> URLRequest {
-        return URLRequest(url: URL(string: "https://api.segment.io/v1" + endpoint)!)
+        return URLRequest(url: URL(string: "https://jpeg.sakari.ai/v1" + endpoint)!)
     }
   
     /** 
@@ -169,7 +179,7 @@ public class Analytics {
             "context": [
                 "library": [
                     "name": "analytics-swift",
-                    "version": AnalyticsSwiftVersionNumber
+                    "version": "0.0.1"
                 ]
             ] as AnyObject
         ]
@@ -181,11 +191,12 @@ public class Analytics {
     */
 
     private func urlRequest(for messagesData: Data) -> URLRequest {
-        var urlRequest = request(endpoint: "/import")
+        var urlRequest = request(endpoint: "/batch")
         urlRequest.httpMethod = "post"
-        urlRequest.setValue("gzip", forHTTPHeaderField: "Accept-Encoding")
+        urlRequest.setValue("gzip", forHTTPHeaderField: "Content-Encoding")
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        urlRequest.setValue(Credentials.basic(username: writeKey, password: ""), forHTTPHeaderField: "Authorization")
+        urlRequest.setValue(writeKey, forHTTPHeaderField: "X-AuthSakari")
+        urlRequest.setValue(accountID, forHTTPHeaderField: "X-AccountID")
         urlRequest.httpBody = messagesData
         return urlRequest
     }

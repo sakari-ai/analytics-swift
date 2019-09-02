@@ -54,4 +54,8 @@ public class IdentifyMessageBuilder: MessageBuilder {
     public func build() -> [String: AnyObject] {
         return dictionary
     }
+    
+    public func type() -> String {
+        return "identify"
+    }
 }

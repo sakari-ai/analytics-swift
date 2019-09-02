@@ -50,4 +50,8 @@ public class AliasMessageBuilder: MessageBuilder {
     public func build() -> [String: AnyObject] {
         return dictionary
     }
+    
+    public func type() -> String {
+        return "alias"
+    }
 }

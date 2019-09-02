@@ -24,4 +24,5 @@ import Foundation
 
 public protocol MessageBuilder {
     func build() -> [String: AnyObject]
+    func type() -> String
 }
