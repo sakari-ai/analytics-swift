@@ -70,11 +70,11 @@ How do you get this in your own Swift app? Follow the steps below.
 To install Segment in your own app, follow the 3 steps below:
 1. The recommended way to install Analytics for iOS is via [Cocoapods](http://cocoapods.org/). Add the `Analytics` dependency to your `Podfile` to access the SDK:
 	```Swift
-	pod 'Analytics', :git => 'https://github.com/segmentio/analytics-ios.git', :branch => 'master'
+	pod 'Analytics', :git => 'https://github.com/sakari-ai/analytics-ios.git', :branch => 'sakari-development'
 	```
 	If you are using [Carthage](https://github.com/Carthage/Carthage), use this line in your  `Cartfile`:
 	```Swift
-	github "segmentio/analytics-ios" "master"
+	github "sakari-ai/analytics-ios" "sakari-development"
 	```
 
 2. In `AppDelegate`, import the library:
@@ -85,16 +85,11 @@ To install Segment in your own app, follow the 3 steps below:
 	Then, modify your `application` method with the following snippet below:
     ```Swift
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let config = SEGAnalyticsConfiguration(writeKey: "YOUR_WRITE_KEY")
-        SEGAnalytics.setup(with: config)
+        let sakariKit = Analytics.create(writeKey: "key", accountID: "accountID")
+        sakariKit.enqueue(messageBuilder: TrackMessageBuilder(event: "bye, world" + String(index)).userId("prateek"))
         return true
     }
     ```
-
-3. [Sign up with Segment](https://app.segment.com/signup?utm_source=github&utm_medium=click&utm_campaign=protos_swift) and locate your Segment project's **Write Key**. Replace `YOUR_WRITE_KEY` in the snippet above with your Segment project's write key.<br/>
-    > **Tip!** You can find your write key in your Segment project setup guide or settings.
-
-Now `SEGAnalytics.shared()` is loaded and available to use throughout your app!
 
 #### Logging
 To see a trace of your data going through the SDK, you can enable debug logging with  `debug` property. Set the `debug` property to `true` on the `config` object in your `AppDelegate`:
