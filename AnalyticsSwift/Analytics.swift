@@ -57,6 +57,11 @@ public class Analytics {
     */
 
     private let flushQueueSize = 10
+    
+    /**
+     Compress payload
+    */
+    private let gzip = false
 
     // MARK: Public interface
   
@@ -193,10 +198,12 @@ public class Analytics {
     private func urlRequest(for messagesData: Data) -> URLRequest {
         var urlRequest = request(endpoint: "/batch")
         urlRequest.httpMethod = "post"
-        urlRequest.setValue("gzip", forHTTPHeaderField: "Content-Encoding")
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue(writeKey, forHTTPHeaderField: "X-AuthSakari")
         urlRequest.setValue(accountID, forHTTPHeaderField: "X-AccountID")
+        if self.gzip {
+            urlRequest.setValue("gzip", forHTTPHeaderField: "Content-Encoding")
+        }
         urlRequest.httpBody = messagesData
         return urlRequest
     }
